@@ -1,9 +1,9 @@
-package com.atlassian.report.reportPlugin.impl;
+package com.atlassian.plugin.reportPlugin.impl;
 
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.ApplicationProperties;
-import com.atlassian.report.reportPlugin.api.MyPluginComponent;
+import com.atlassian.plugin.reportPlugin.api.MyPluginComponent;
 
 import javax.inject.Inject;
 import javax.inject.Named;

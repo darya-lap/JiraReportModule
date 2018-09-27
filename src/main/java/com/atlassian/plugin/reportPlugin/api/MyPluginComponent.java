@@ -1,4 +1,4 @@
-package com.atlassian.report.reportPlugin.api;
+package com.atlassian.plugin.reportPlugin.api;
 
 public interface MyPluginComponent
 {
