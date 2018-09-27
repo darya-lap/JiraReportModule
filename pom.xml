@@ -82,6 +82,15 @@
             <version>2.2.2-atlassian-1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.atlassian.sal/sal-api -->
+
+        <dependency>
+            <groupId>com.atlassian.sal</groupId>
+            <artifactId>sal-api</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Uncomment to use TestKit in your project. Details at https://bitbucket.org/atlassian/jira-testkit -->
         <!-- You can read more about TestKit at https://developer.atlassian.com/display/JIRADEV/Plugin+Tutorial+-+Smarter+integration+testing+with+TestKit -->
         <!--
@@ -124,7 +133,7 @@
 
                         <!-- Add package to export here -->
                         <Export-Package>
-                            com.atlassian.report.api,
+                            com.atlassian.report.reportPlugin.api,
                         </Export-Package>
 
                         <!-- Add package import here -->

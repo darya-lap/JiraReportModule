@@ -1,9 +1,9 @@
-package it.com.atlassian.report;
+package it.com.atlassian.report.reportPlugin;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.atlassian.plugins.osgi.test.AtlassianPluginsTestRunner;
-import com.atlassian.report.api.MyPluginComponent;
+import com.atlassian.report.reportPlugin.api.MyPluginComponent;
 import com.atlassian.sal.api.ApplicationProperties;
 
 import static org.junit.Assert.assertEquals;
