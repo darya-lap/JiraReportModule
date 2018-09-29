@@ -1,7 +1,6 @@
 package com.atlassian.plugins.tutorial.jira.reports;
 
 import com.atlassian.core.util.DateUtils;
-import com.atlassian.jira.project.Project;
 import com.atlassian.jira.security.roles.ProjectRole;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.component.ComponentAccessor;
@@ -14,13 +13,13 @@ import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
 import com.atlassian.jira.project.ProjectManager;
 import com.atlassian.jira.security.roles.ProjectRoleManager;
-import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 import com.atlassian.query.Query;
 import org.apache.log4j.Logger;
+import webwork.action.ActionContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,10 +42,8 @@ public class CreateReport extends AbstractReport {
     private final DateTimeFormatter formatter;
     private final ProjectRoleManager projectRoleManager;
 
-    private Date startDate;
-    private Date endDate;
-    private Long interval;
-    private Long projectId;
+    private Date dueDate;
+
 
 
     public CreateReport(SearchProvider searchProvider, ProjectManager projectManager,
@@ -60,7 +57,8 @@ public class CreateReport extends AbstractReport {
 
     public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
 
-        fillIssuesCounts(startDate, endDate, interval, action.getLoggedInUser(), projectId);
+
+        //fillIssuesCounts(startDate, endDate, interval, action.getLoggedInUser(), projectId);
         List<Number> issueBarHeights = new ArrayList<>();
         if (maxCount > 0) {
             openIssuesCounts.forEach(issueCount ->
@@ -68,34 +66,39 @@ public class CreateReport extends AbstractReport {
             );
         }
         Map<String, Object> velocityParams = new HashMap<>();
-        velocityParams.put("startDate", formatter.format(startDate));
-        velocityParams.put("endDate", formatter.format(endDate));
+        velocityParams.put("dueDate", formatter.format(dueDate));
+
         velocityParams.put("openCount", openIssuesCounts);
         velocityParams.put("issueBarHeights", issueBarHeights);
         velocityParams.put("dates", formattedDates);
         velocityParams.put("maxHeight", MAX_HEIGHT);
-        velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
-        velocityParams.put("interval", interval);
         return descriptor.getHtml("view", velocityParams);
     }
 
-    public boolean showReport(){
-        System.out.println("IN SHHHOOOWWW RE{POPORPTO");
-        if (projectId != null){
-            ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-            System.out.println(projectId);
-            Project project = projectManager.getProjectObj(projectId);
 
-            Collection<ProjectRole> userRoles = projectRoleManager.getProjectRoles(user,project);
-            System.out.println(userRoles);
-            for (ProjectRole role:userRoles) {
-                if (role.getName().equals("Project-Manager")) return true;
-            }
-            return false;
+    public boolean showReport() {
+
+        ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+        long projectId;
+        Collection<ProjectRole> projectRoles;
+
+        if (ActionContext.getParameters().isEmpty()) {
+            String[] url = ActionContext.getRequest().getRequestURL().toString().split("/");
+            projectRoles = projectRoleManager.getProjectRoles(user, projectManager.getProjectByCurrentKey(url[url.length-1]));
+
+        } else {
+            String[] ids = (String[]) ActionContext.getParameters().get("selectedProjectId");
+            projectId = Long.parseLong(ids[0]);
+            projectRoles = projectRoleManager.getProjectRoles(user, projectManager.getProjectObj(projectId));
         }
-        return true;
-    }
 
+        for (ProjectRole role:projectRoles) {
+            if (role.getName().equals("Project-Manager")){
+                return true;
+            }
+        }
+        return false;
+    }
 
     private long getOpenIssueCount(ApplicationUser user, Date startDate, Date endDate, Long projectId) throws SearchException {
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
@@ -123,32 +126,12 @@ public class CreateReport extends AbstractReport {
     }
 
     public void validate(ProjectActionSupport action, Map params) {
-        try {
-            startDate = formatter.parse(ParameterUtils.getStringParam(params, "startDate"));
-        } catch (IllegalArgumentException e) {
-            action.addError("startDate", action.getText("report.issuecreation.startdate.required"));
-            log.error("Exception while parsing startDate");
-        }
-        try {
-            endDate = formatter.parse(ParameterUtils.getStringParam(params, "endDate"));
-        } catch (IllegalArgumentException e) {
-            action.addError("endDate", action.getText("report.issuecreation.enddate.required"));
-            log.error("Exception while parsing endDate");
-        }
 
-        interval = ParameterUtils.getLongParam(params, "interval");
-        projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-        if (interval == null || interval <= 0) {
-            action.addError("interval", action.getText("report.issuecreation.interval.invalid"));
-            log.error("Invalid interval");
-        }
-        if (projectId == null || projectManager.getProjectObj(projectId) == null){
-            action.addError("selectedProjectId", action.getText("report.issuecreation.projectid.invalid"));
-            log.error("Invalid projectId");
-        }
-        if (startDate != null && endDate != null && endDate.before(startDate)) {
-            action.addError("endDate", action.getText("report.issuecreation.before.startdate"));
-            log.error("Invalid dates: start date should be before end date");
+        try {
+            dueDate = formatter.parse(ParameterUtils.getStringParam(params, "dueDate"));
+        } catch (IllegalArgumentException e) {
+            action.addError("dueDate", action.getText("report.issuecreation.duedate.required"));
+            log.error("Exception while parsing dueDate");
         }
     }
 }
