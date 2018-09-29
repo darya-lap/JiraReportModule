@@ -121,8 +121,9 @@ public class SingleLevelGroupByReportExtended extends AbstractReport {
         }
         String mapperName = (String) params.get("mapper");
         final StatisticsMapper mapper = new FilterStatisticsValuesGenerator().getStatsMapper(mapperName);
+
         final JiraServiceContext ctx = new JiraServiceContextImpl(action.getLoggedInUser());
-        final SearchRequest request = searchRequestService.getFilter(ctx, new Long(filterId));
+        final SearchRequest request = searchRequestService.getFilter(ctx, Long.valueOf(filterId));
 
         try {
             final Map startingParams = ImmutableMap.builder()

@@ -1,33 +1,92 @@
+#enable_html_escaping()
+ <h1>$i18n.getText('report.issuecreation.project'): $projectName | $i18n.getText('report.issuecreation.duration'): $dateFormat.format($dueDate) |</h1>
+
+<table width="100%" class="aui">
+    <thead>
+    <tr>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.key')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.summary')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.due.date')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.assignee')</h2>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+
+        #foreach ($issue in $allIssues)
+            #set ($issueKey = $issue.getKey())
+            #set ($issueSummary = $issue.getSummary())
+            #set ($issueDueDate = $dateFormat.format($issue.getDueDate()))
+            #set ($issueAssignee = $issue.getAssigneeId())
+        <tr>
+            <th colspan="6" class="stat-heading">
+##                <div class="stat-progress">
+##                    <span class="graphLabel">$i18n.getText("common.words.progress"):</span>
+##                    #percentageGraphDiv ($graphModel)
+##                    #if ($issues.size() > 0)
+##                        <span class="graphDescription">$i18n.getText("roadmap.issuesresolved", "$statsGroup.getResolvedIssueCount($issues)", "$issues.size()")</span>
+##                    #end
+##                </div>
+##                <h3>#statHeading ($mapperType $option.key $customFieldManager "${urlPrefix}$!searchService.getQueryString($user, $statsGroup.getMapper().getSearchUrlSuffix($option.key, $searchRequest).getQuery())")</h3>
+                <h3>$issueKey</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueSummary</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueDueDate</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueAssignee</h3>
+            </th>
+        </tr>
+
+        #end
+
+
+    </tbody>
+</table>
 ##<div style="padding: 5px">
 ##    <!-- Display the report configuration -->
 ##    <h4 id="creation-report-parameters">
-####        $i18n.getText('report.issuecreation.project'): $projectName |
+##        $i18n.getText('report.issuecreation.project'): $projectName |
 ##        $i18n.getText('report.issuecreation.duration'):$dueDate |
-##        $i18n.getText('report.issuecreation.interval'): $dueDate $i18n.getText('report.issuecreation.interval.days')
 ##    </h4>
 ##    <br />
 ##    <table style="width: 100%; border: 0; background-color: lightgrey">
+##
 ##        <!-- Create a row to display the bars-->
 ##        <tr valign="bottom" style="background-color: white; padding: 1px">
-##            #foreach ($issueBarHeight in $issueBarHeights)
-##                <td height="$maxHeight" align="center">
-##                    #if ($issueBarHeight > 0)
-##                        <img src="${baseurl}/images/bluepixel.gif" width="12" height="$issueBarHeight">
-##                    #end
-##                </td>
-##            #end
+##            <h>sdkfjsdklfjsdkl</h>
+##
+####            #foreach ($issueBarHeight in $issueBarHeights)
+####                <td height="$maxHeight" align="center">
+####                    #if ($issueBarHeight > 0)
+####                        <img src="${baseurl}/images/bluepixel.gif" width="12" height="$issueBarHeight">
+####                    #end
+####                </td>
+####            #end
 ##        </tr>
 ##        <!-- Have one row for the issue count -->
 ##        <tr style="background-color: #eee; padding: 1px">
-##            #foreach ($count in $openCount)
-##                <td align="center"><b>$count</b></td>
-##            #end
+####            #foreach ($count in $openCount)
+####                <td align="center"><b>$count</b></td>
+####            #end
+##    <h>sdkfjsdklfjsdkl</h>
 ##        </tr>
 ##        <!-- And one row to display the date -->
 ##        <tr style="background-color: #eee; padding: 1px">
-##            #foreach ($date in $dates)
-##                <td align="center"><b>$date</b></td>
-##            #end
+####            #foreach ($date in $dates)
+####                <td align="center"><b>$date</b></td>
+####            #end
+##    <h>sdkfjsdklfjsdkl</h>
 ##        </tr>
 ##    </table>
 ##</div>
