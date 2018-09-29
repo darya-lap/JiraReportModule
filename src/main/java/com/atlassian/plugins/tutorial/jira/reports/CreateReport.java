@@ -1,6 +1,11 @@
 package com.atlassian.plugins.tutorial.jira.reports;
 
+import com.atlassian.annotations.JIRA;
 import com.atlassian.core.util.DateUtils;
+import com.atlassian.jira.config.properties.APKeys;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.plugin.webfragment.model.JiraHelper;
+import com.atlassian.jira.project.Project;
 import com.atlassian.jira.security.roles.ProjectRole;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.component.ComponentAccessor;
@@ -13,8 +18,11 @@ import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
 import com.atlassian.jira.project.ProjectManager;
 import com.atlassian.jira.security.roles.ProjectRoleManager;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.UserProjectHistoryManager;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
+import com.atlassian.oauth.event.AccessTokenRemovedEvent;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 import com.atlassian.query.Query;
@@ -42,8 +50,10 @@ public class CreateReport extends AbstractReport {
     private final DateTimeFormatter formatter;
     private final ProjectRoleManager projectRoleManager;
 
-    private Date dueDate;
+    private ApplicationUser user;
+    private long projectId;
 
+    private Date dueDate;
 
 
     public CreateReport(SearchProvider searchProvider, ProjectManager projectManager,
@@ -52,13 +62,15 @@ public class CreateReport extends AbstractReport {
         this.projectManager = projectManager;
         this.projectRoleManager  = ComponentAccessor.getComponent(ProjectRoleManager.class);
         this.formatter = dateTimeFormatterFactory.formatter().withStyle(DateTimeStyle.DATE).forLoggedInUser();
+        this.user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
     }
 
 
     public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
 
+        //this.projectManager.
 
-        //fillIssuesCounts(startDate, endDate, interval, action.getLoggedInUser(), projectId);
+        fillIssuesCounts(dueDate);
         List<Number> issueBarHeights = new ArrayList<>();
         if (maxCount > 0) {
             openIssuesCounts.forEach(issueCount ->
@@ -66,8 +78,6 @@ public class CreateReport extends AbstractReport {
             );
         }
         Map<String, Object> velocityParams = new HashMap<>();
-        velocityParams.put("dueDate", formatter.format(dueDate));
-
         velocityParams.put("openCount", openIssuesCounts);
         velocityParams.put("issueBarHeights", issueBarHeights);
         velocityParams.put("dates", formattedDates);
@@ -78,8 +88,7 @@ public class CreateReport extends AbstractReport {
 
     public boolean showReport() {
 
-        ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-        long projectId;
+
         Collection<ProjectRole> projectRoles;
 
         if (ActionContext.getParameters().isEmpty()) {
@@ -100,38 +109,45 @@ public class CreateReport extends AbstractReport {
         return false;
     }
 
-    private long getOpenIssueCount(ApplicationUser user, Date startDate, Date endDate, Long projectId) throws SearchException {
+    private long getOpenIssueCount(Date dueDate) throws SearchException {
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
-        return searchProvider.searchCount(query, user);
+        Query query = queryBuilder.where().due().lt(dueDate).and().project(this.projectId).buildQuery();
+        System.out.println(query);
+        return searchProvider.searchCount(query, this.user);
     }
 
 
-    private void fillIssuesCounts(Date startDate, Date endDate, Long interval, ApplicationUser user, Long projectId) throws SearchException {
-        long intervalValue = interval * DateUtils.DAY_MILLIS;
-        Date newStartDate;
+    private void fillIssuesCounts(Date dueDate) throws SearchException {
+
+        Date issueDueDate;
         long count;
-        while (startDate.before(endDate)) {
-            newStartDate = new Date(startDate.getTime() + intervalValue);
-            if (newStartDate.after(endDate))
-                count = getOpenIssueCount(user, startDate, endDate, projectId);
-            else
-                count = getOpenIssueCount(user, startDate, newStartDate, projectId);
-            if (maxCount < count)
-                maxCount = count;
-            openIssuesCounts.add(count);
-            formattedDates.add(formatter.format(startDate));
-            startDate = newStartDate;
-        }
+
+        count = getOpenIssueCount(dueDate);
+        System.out.println(count);
+//        while (startDate.before(endDate)) {
+//            newStartDate = new Date(startDate.getTime() + intervalValue);
+//            if (newStartDate.after(endDate))
+//                count = getOpenIssueCount(user, startDate, endDate, projectId);
+//            else
+//                count = getOpenIssueCount(user, startDate, newStartDate, projectId);
+//            if (maxCount < count)
+//                maxCount = count;
+//            openIssuesCounts.add(count);
+//            formattedDates.add(formatter.format(startDate));
+//            startDate = newStartDate;
+//        }
     }
 
     public void validate(ProjectActionSupport action, Map params) {
 
         try {
             dueDate = formatter.parse(ParameterUtils.getStringParam(params, "dueDate"));
+            if (dueDate == null) dueDate = new Date();
+            System.out.println("EVERYTHING OOOOKKK");
         } catch (IllegalArgumentException e) {
             action.addError("dueDate", action.getText("report.issuecreation.duedate.required"));
             log.error("Exception while parsing dueDate");
         }
     }
+
 }

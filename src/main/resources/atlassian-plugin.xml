@@ -28,7 +28,7 @@
       <properties>
 
           <property>
-              <key>endDate</key>
+              <key>dueDate</key>
               <name>report.issuecreation.duedate</name>
               <description>report.issuecreation.duedate.description</description>
               <type>date</type>
