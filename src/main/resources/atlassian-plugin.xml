@@ -19,11 +19,11 @@
     <context>jira-report-plugin</context>
   </web-resource>
 
-  <report name="Create Report" i18n-name-key="create-report.name" key="create-report" class="com.atlassian.plugins.tutorial.jira.reports.CreateReport">
-    <description key="create-report.description">The Create Report Plugin</description>
-    <resource name="view" type="velocity" location="/templates/reports/create-report/view.vm"/>
-    <resource name="i18n" type="i18n" location="CreateReport"/>
-    <label key="create-report.label"></label>
+  <report name="Due Date Report" i18n-name-key="due-date-report.name" key="due-date-report" class="com.atlassian.plugins.jira.reports.DueDateReport">
+    <description key="due-date-report.description">The Due Date Report Plugin</description>
+    <resource name="view" type="velocity" location="/templates/reports/due-date-report/view.vm"/>
+    <resource name="i18n" type="i18n" location="DueDateReport"/>
+    <label key="due-date-report.label"></label>
     <!-- the properties of this report which the user must select before running it -->
       <properties>
 

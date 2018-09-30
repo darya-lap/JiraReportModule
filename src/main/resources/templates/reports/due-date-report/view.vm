@@ -1,0 +1,49 @@
+#enable_html_escaping()
+ <h1>$i18n.getText('report.issuecreation.project'): $projectName | $i18n.getText('report.issuecreation.issue.duedate'): $dateFormat.format($dueDate) |</h1>
+
+<table width="100%" class="aui">
+    <thead>
+    <tr>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.key')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.summary')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.duedate')</h2>
+        </th>
+        <th colspan="6">
+            <h2>$i18n.getText('report.issuecreation.issue.assignee')</h2>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+
+        #foreach ($issue in $allIssues)
+            #set ($issueKey = $issue.getKey())
+            #set ($issueSummary = $issue.getSummary())
+            #set ($issueDueDate = $dateFormat.format($issue.getDueDate()))
+            #if (!$issue.getAssigneeUser())
+                #set ($issueAssignee = "Unassigned")
+            #else
+                #set ($issueAssignee = $issue.getAssigneeUser().getName())
+            #end
+        <tr>
+            <th colspan="6" class="stat-heading">
+                <h3>$issueKey</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueSummary</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueDueDate</h3>
+            </th>
+            <th colspan="6">
+                <h3>$issueAssignee</h3>
+            </th>
+        </tr>
+
+        #end
+    </tbody>
+</table>
